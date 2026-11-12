@@ -1,3 +1,5 @@
+<p align="center"><img src="icons/png/icon-256.png" width="128" alt="termx"></p>
+
 # termx
 
 A small, fast glass terminal for Windows, in Rust (tao + wry) with xterm.js on top of ConPTY.
@@ -47,6 +49,15 @@ cargo build --release
 ```
 
 The binary is `target\release\termx.exe`. xterm.js and its addons are vendored in `src/vendor` (MIT, see `LICENSE-xterm`).
+
+## Icons
+
+`assets/logo.svg` is the master (48px and up) and `assets/logo-small.svg` the simplified mark for 16–32px.
+After editing either, regenerate `icons/icon.ico`, `icons/icon.png` and `icons/png/*` with:
+
+```
+powershell -ExecutionPolicy Bypass -File scripts\icons.ps1
+```
 
 ## Release
 
