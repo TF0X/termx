@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>glassterm</title>
+<link rel="stylesheet" href="xterm.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.86);
+  font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+/* The one translucent layer over the window's acrylic; alpha set per glass level. */
+body { background-color: rgba(var(--tint), var(--alpha)); transition: background-color .25s ease; }
+
+#bar {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 38px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 10px 0 12px;
+  background: rgba(255, 255, 255, 0.025);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ---- window controls ---- */
+.winbar { display: flex; gap: 7px; flex: 0 0 auto; margin-right: 6px; }
+.wbtn {
+  width: 13px; height: 13px; border: 0; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.13);
+  cursor: pointer; padding: 0;
+  transition: background .16s ease, transform .16s ease;
+}
+.wbtn:hover { transform: scale(1.14); }
+.wbtn.close:hover { background: #FF5F57; }
+.wbtn.min:hover   { background: #FEBC2E; }
+.wbtn.max:hover   { background: #28C840; }
+
+/* ---- tabs ---- */
+#tabs { display: flex; gap: 4px; min-width: 0; flex: 0 1 auto; overflow: hidden; }
+.tab {
+  position: relative;
+  display: flex; align-items: center; gap: 6px;
+  height: 26px; min-width: 0; max-width: 190px;
+  padding: 0 6px 0 11px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  cursor: default;
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+.tab:hover { background: rgba(255, 255, 255, 0.07); color: rgba(255, 255, 255, 0.8); }
+.tab.on {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.tab .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tab .x {
+  flex: 0 0 auto;
+  width: 16px; height: 16px; border: 0; border-radius: 5px;
+  background: transparent; color: inherit;
+  font-size: 13px; line-height: 16px; cursor: pointer;
+  opacity: 0; transition: opacity .14s ease, background .14s ease;
+}
+.tab:hover .x, .tab.on .x { opacity: .55; }
+.tab .x:hover { opacity: 1; background: rgba(255, 255, 255, 0.12); }
+
+.ibtn {
+  flex: 0 0 auto;
+  width: 26px; height: 26px;
+  border: 0; border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .18s ease, color .18s ease;
+}
+.ibtn:hover { background: rgba(255, 255, 255, 0.09); color: rgba(255, 255, 255, 0.9); }
+#glass { font-size: 12px; }
+#glass.lit { color: rgba(255, 255, 255, 0.85); }
+
+.spacer { flex: 1 1 auto; align-self: stretch; }
+
+/* ---- terminal ---- */
+#stage { position: absolute; top: 38px; left: 0; right: 0; bottom: 0; padding: 8px 4px 6px 12px; }
+.pane { width: 100%; height: 100%; display: none; }
+.pane.on { display: block; }
+.xterm .xterm-viewport { background-color: transparent !important; }
+.xterm-viewport::-webkit-scrollbar { width: 8px; }
+.xterm-viewport::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
+.xterm-viewport::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.22); }
+.xterm-viewport::-webkit-scrollbar-track { background: transparent; }
+
+/* ---- resize grips (frameless windows get none for free) ---- */
+.rz { position: absolute; z-index: 10; }
+.rz.n  { top: 0; left: 0; right: 0; height: 4px; cursor: ns-resize; }
+.rz.s  { bottom: 0; left: 0; right: 0; height: 4px; cursor: ns-resize; }
+.rz.w  { left: 0; top: 0; bottom: 0; width: 4px; cursor: ew-resize; }
+.rz.e  { right: 0; top: 0; bottom: 0; width: 4px; cursor: ew-resize; }
+.rz.nw { top: 0; left: 0; width: 10px; height: 10px; cursor: nwse-resize; }
+.rz.ne { top: 0; right: 0; width: 10px; height: 10px; cursor: nesw-resize; }
+.rz.sw { bottom: 0; left: 0; width: 10px; height: 10px; cursor: nesw-resize; }
+.rz.se { bottom: 0; right: 0; width: 10px; height: 10px; cursor: nwse-resize; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <div class="winbar">
+    <button class="wbtn close" title="Close"></button>
+    <button class="wbtn min" title="Minimize"></button>
+    <button class="wbtn max" title="Maximize"></button>
+  </div>
+  <div id="tabs"></div>
+  <button id="add" class="ibtn" title="New tab (Ctrl+Shift+T)">+</button>
+  <div id="drag" class="spacer" title="Drag to move"></div>
+  <button id="glass" class="ibtn"></button>
+</div>
+<div id="stage"></div>
+<script src="xterm.js"></script>
+<script src="addon-fit.js"></script>
+<script src="addon-web-links.js"></script>
+<script src="term.js"></script>
+</body>
+</html>
