@@ -1,24 +1,43 @@
-# glassterm
+# termx
 
-A small glass terminal for Windows, in Rust (tao + wry) with xterm.js on top of ConPTY.
+A small, fast glass terminal for Windows, in Rust (tao + wry) with xterm.js on top of ConPTY.
 Same frosted acrylic backdrop as prism and anion.
 
 ## Features
 
 - Real desktop blur behind the window, three glass levels (Solid / Frosted / Clear)
-- Tabs: `Ctrl+Shift+T` new, `Ctrl+Shift+W` close, `Ctrl+Tab` / `Ctrl+Shift+Tab` switch, middle-click closes
-- Copy / paste: `Ctrl+C` with a selection copies (otherwise it is SIGINT), `Ctrl+V` or `Ctrl+Shift+V` pastes, right-click copies or pastes
-- `Ctrl+=` / `Ctrl+-` / `Ctrl+0` font size
-- `Ctrl+click` opens links in the default browser
-- Remembers window position, size, glass level and font size
+- Tabs of split panes, like Tilix or Terminator
+- Profile dropdown listing the shells it finds: PowerShell 7, Windows PowerShell, Command Prompt, Git Bash and every WSL distro
+- Built-in robbyrussell-style prompt (`➜  folder git:(branch)`) for PowerShell, cmd and Git Bash, plus zsh-style Tab menu completion in PowerShell. Steps aside if you use oh-my-posh or starship
+- Wobbly window drag
+- GPU (WebGL) rendering, ~1 MB binary, webview memory trimmed while idle
+- Remembers window position, size, glass level, font size and toggles
 
-## Shell
+## Keys
 
-Uses `pwsh.exe` if it is on `PATH`, otherwise `powershell.exe`. To use something else, set
-`shell` and `args` in `%LOCALAPPDATA%\glassterm\state.json`, e.g.
+| Keys | Action |
+| --- | --- |
+| `Ctrl+Shift+T` | New tab |
+| `Ctrl+Shift+1`…`9` | New tab with profile N |
+| `Ctrl+Shift+Space` | Profile / split dropdown |
+| `Ctrl+Shift+E` / `Ctrl+Shift+O` | Split right / down |
+| `Alt+Shift+Arrow` | Split in that direction |
+| `Alt+Arrow` | Move focus between panes |
+| `Ctrl+Shift+W` | Close pane |
+| `Ctrl+Tab` / `Ctrl+Shift+Tab` | Next / previous tab |
+| `Ctrl+C` | Copy if text is selected, otherwise interrupt |
+| `Ctrl+V`, `Ctrl+Shift+V`, right-click | Paste (right-click copies when there is a selection) |
+| `Ctrl+=` / `Ctrl+-` / `Ctrl+0` | Font size |
+| `Ctrl+click` | Open link |
+
+Alt+click a profile in the dropdown to open it in a split. Drag pane dividers to resize.
+
+## Custom shell
+
+To add your own shell as the first profile, set `shell` and `args` in `%LOCALAPPDATA%\termx\state.json`:
 
 ```json
-{ "shell": "cmd.exe", "args": [] }
+{ "shell": "C:\\tools\\nu.exe", "args": [] }
 ```
 
 ## Build
@@ -27,4 +46,19 @@ Uses `pwsh.exe` if it is on `PATH`, otherwise `powershell.exe`. To use something
 cargo build --release
 ```
 
-The binary is `target\release\glassterm.exe`. xterm.js is vendored in `src/vendor` (MIT, see `LICENSE-xterm`).
+The binary is `target\release\termx.exe`. xterm.js and its addons are vendored in `src/vendor` (MIT, see `LICENSE-xterm`).
+
+## Release
+
+CI runs fmt, clippy and a release build on every push. To publish a release, bump `version` in `Cargo.toml`, then:
+
+```
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The release workflow checks the tag matches `Cargo.toml` and attaches `termx.exe`, a zip and `SHA256SUMS.txt`. Tags with a `-` (e.g. `v0.2.0-beta.1`) are marked as pre-releases.
+
+## License
+
+MIT

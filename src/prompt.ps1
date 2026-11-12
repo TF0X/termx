@@ -1,4 +1,4 @@
-# glassterm's built-in prompt, robbyrussell style:  ➜  folder git:(branch)
+# termx's built-in prompt, robbyrussell style:  ➜  folder git:(branch)
 # Runs after the user's own $PROFILE. Steps aside for oh-my-posh / starship.
 if (-not ($env:POSH_SESSION_ID -or $env:STARSHIP_SHELL)) {
     function global:prompt {

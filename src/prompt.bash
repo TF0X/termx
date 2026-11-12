@@ -1,4 +1,4 @@
-# glassterm's built-in prompt for Git Bash, robbyrussell style. Passed in as
+# termx's built-in prompt for Git Bash, robbyrussell style. Passed in as
 # PROMPT_COMMAND, so a ~/.bashrc that sets its own PROMPT_COMMAND wins.
 # Inline rather than functions (env vars cannot carry those), and no $(...)
 # subshells: every fork costs real time under MSYS.

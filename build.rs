@@ -4,8 +4,8 @@ fn main() {
         println!("cargo:rerun-if-changed=icons/icon.ico");
         let mut res = winresource::WindowsResource::new();
         res.set_icon("icons/icon.ico");
-        res.set("ProductName", "glassterm");
-        res.set("FileDescription", "glassterm");
+        res.set("ProductName", "termx");
+        res.set("FileDescription", "termx");
         if let Err(e) = res.compile() {
             println!("cargo:warning=icon resource not embedded: {e}");
         }

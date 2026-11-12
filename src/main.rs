@@ -65,7 +65,9 @@ enum Ev {
     Font(u8),
     Wobble(bool),
     Theme(bool),
-    Drag { wobble: bool },
+    Drag {
+        wobble: bool,
+    },
     Settled,
     Resize(ResizeDirection),
     Maximize,
@@ -107,7 +109,7 @@ struct Session {
 fn state_dir() -> PathBuf {
     let dir = dirs::data_local_dir()
         .unwrap_or_else(|| PathBuf::from("."))
-        .join("glassterm");
+        .join("termx");
     let _ = std::fs::create_dir_all(&dir);
     dir
 }
@@ -231,20 +233,17 @@ fn load_state() -> State {
     }
     .filter(|(_, _, w, h)| *w >= 360 && *h >= 220);
 
-    let custom = v["shell"]
-        .as_str()
-        .filter(|s| !s.is_empty())
-        .map(|s| {
-            let args = v["args"]
-                .as_array()
-                .map(|a| {
-                    a.iter()
-                        .filter_map(|x| x.as_str().map(str::to_owned))
-                        .collect()
-                })
-                .unwrap_or_default();
-            (s.to_owned(), args)
-        });
+    let custom = v["shell"].as_str().filter(|s| !s.is_empty()).map(|s| {
+        let args = v["args"]
+            .as_array()
+            .map(|a| {
+                a.iter()
+                    .filter_map(|x| x.as_str().map(str::to_owned))
+                    .collect()
+            })
+            .unwrap_or_default();
+        (s.to_owned(), args)
+    });
 
     State {
         glass: v["glass"].as_u64().unwrap_or(1).min(2) as u8,
@@ -392,10 +391,7 @@ fn apply_theme(cmd: &mut CommandBuilder, kind: &str) {
             cmd.args(["-NoExit", "-EncodedCommand", &B64.encode(utf16)]);
         }
         "cmd" => {
-            cmd.env(
-                "PROMPT",
-                "$E]0;$P$E\\$E[1;32m\u{279C}$S$S$E[1;36m$P$E[0m$S",
-            );
+            cmd.env("PROMPT", "$E]0;$P$E\\$E[1;32m\u{279C}$S$S$E[1;36m$P$E[0m$S");
         }
         "gitbash" => {
             cmd.env("PROMPT_COMMAND", PROMPT_BASH);
@@ -626,7 +622,7 @@ fn main() -> wry::Result<()> {
     });
 
     let mut builder = WindowBuilder::new()
-        .with_title("glassterm")
+        .with_title("termx")
         .with_min_inner_size(LogicalSize::new(360.0, 220.0))
         .with_decorations(false)
         .with_transparent(true)
@@ -670,8 +666,8 @@ fn main() -> wry::Result<()> {
     let ipc = proxy.clone();
     let mut wb = WebViewBuilder::new_with_web_context(ctx)
         .with_transparent(true)
-        .with_custom_protocol("glassterm".into(), |_id, req| serve(&req))
-        .with_url("glassterm://localhost/index.html")
+        .with_custom_protocol("termx".into(), |_id, req| serve(&req))
+        .with_url("termx://localhost/index.html")
         .with_ipc_handler(move |req: Request<String>| {
             if let Some(ev) = parse(req.body()) {
                 let _ = ipc.send_event(ev);

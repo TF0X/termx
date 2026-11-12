@@ -1,5 +1,5 @@
 [package]
-name = "glassterm"
+name = "termx"
 version = "0.1.0"
 edition = "2024"
 description = "A small glass terminal for Windows"
